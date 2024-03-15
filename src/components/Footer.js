@@ -1,17 +1,19 @@
 import * as React from 'react';
+import {StyleSheet} from 'react-native';
 import { BottomNavigation, Text } from 'react-native-paper';
 import RecentNewsScreen from '../screens/RecentNews.js';
+import SourcesScreen from '../screens/Sources.js';
 
 const RecentNewsRoute = () => <RecentNewsScreen />;
-const FavouritesRoute = () => <Text>Albums</Text>;
-const SourcesRoute = () => <Text>Recents</Text>;
+const SourcesRoute = () => <SourcesScreen />;
+const FavouritesRoute = () => <Text>Favourites</Text>;
 
 const FooterComponent = () => {
   const [index, setIndex] = React.useState(0);
 
   const [routes] = React.useState([
     { key: 'recent_news', title: 'Recent News', focusedIcon: 'newspaper' },
-    { key: 'sources', title: 'Sources', focusedIcon: 'history' },
+    { key: 'sources', title: 'Sources', focusedIcon: 'link' },
     { key: 'favorites', title: 'Favorites', focusedIcon: 'heart', unfocusedIcon: 'heart-outline'},
 
   ]);
@@ -31,5 +33,7 @@ const FooterComponent = () => {
     />
   );
 };
+
+
 
 export default FooterComponent;

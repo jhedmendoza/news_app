@@ -1,17 +1,18 @@
-import  {React, useState, useEffect}  from 'react';
-import {StyleSheet, View, ScrollView, Animated} from 'react-native';
-import {Card, Text, ActivityIndicator } from 'react-native-paper';
+import  {React, useState, useEffect, useReducer }  from 'react';
+import {StyleSheet, View, ScrollView, Linking} from 'react-native';
+import {Card, Text, ActivityIndicator, Snackbar  } from 'react-native-paper';
 import axios from 'axios';
-
-import Header from '../components/Header.js';
 
 const RecentNewsScreen = () =>{
 
-    const apiKey = '10f83bbe18b14c5c86721e2a5a9c9579'
-    const apiUrl = 'https://newsapi.org/v2/top-headlines'
+    const defaultBannerImage = 'https://placehold.jp/30/eeeeee/cccccc/300x150.png?text=No+Image'
+    const API_KEY = '10f83bbe18b14c5c86721e2a5a9c9579'
+    const API_URL = 'https://newsapi.org/v2/top-headlines'
 
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1)
+    const [loadMore, setLoadMore] = useState(false);
 
     isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
       const paddingToBottom = 20
@@ -19,51 +20,77 @@ const RecentNewsScreen = () =>{
         contentSize.height - paddingToBottom
     }
 
-    useEffect(() => {
+    const getNewsData = async () => {
+        axios.get(API_URL, {
+          params: {
+           apiKey: API_KEY,
+            country: 'us',
+            page: page,
+            pageSize: 10
+          }
+        })
+        .then(function (response) {
+            if (response.data.status == 'ok') {
 
-        const getTopHeadlines = async () => {
-            axios.get(apiUrl, {
-              params: {
-                country: 'us',
-                apiKey: apiKey
-              }
-            })
-            .then(function (response) {
-                if (response.data.status == 'ok') {
-                    setNews(response.data.articles);
-                    setLoading(false);
+                console.log(response.data)
+                console.log(response.data.articles.length)
+
+                if (response.data.articles.length > 0) {
+
+                    setLoadMore(true)
+
+                    if (page > 1) {
+                        let data = [...news, ...response.data.articles]
+                        setNews(data)
+                    }
+                    else {
+                     setNews(response.data.articles);
+                    }
                 }
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-        }
-        getTopHeadlines();
+                else {
+                    setLoadMore(false);
+                }
 
-    }, [])
+                setLoading(false);
+            }
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
 
-      if (loading) {
+    const loadMoreNewsData = async () => {
+        const newPage = page + 1
+        setPage(newPage);
+        getNewsData(newPage)
+    };
+
+    useEffect(() => {
+        getNewsData(page);
+    }, [page])
+
+    if (loading) {
         return (
           <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
             <ActivityIndicator size='large' />
           </View>
         );
-      }
+    }
 
     return (
         <ScrollView
           scrollEventThrottle={16}
             onScroll={({nativeEvent}) => {
               if (isCloseToBottom(nativeEvent)) {
-                console.log('bottom')
+                loadMoreNewsData()
               }
             }}
-          style={{flex:1}}>
+          style={{flex:1, backgroundColor: '#EAECED'}}>
               {news.map((item, i) => {
-                    const bannerImg = item.urlToImage != null ? item.urlToImage : 'https://placehold.jp/30/dd6699/ffffff/300x150.png?text=banner+image'
+                    const bannerImg = item.urlToImage != null ? item.urlToImage : defaultBannerImage
                     const newsDescription = item.description != null ? item.description : ''
                     return (
-                        <Card style={styles.cards} key={i}>
+                        <Card onPress={() => Linking.openURL(item.url)} style={styles.cards} key={i}>
                             <Card.Cover source={{ uri: bannerImg }} />
                             <Card.Title title={item?.title} subtitle={item?.author} />
                             <Card.Content>
@@ -72,9 +99,11 @@ const RecentNewsScreen = () =>{
                         </Card>
                     );
               })}
+
+              {loadMore ? <ActivityIndicator style={styles.preloader} animating={true} /> : null }
+
         </ScrollView>
     );
-
 };
 
 const styles = StyleSheet.create({
@@ -82,7 +111,12 @@ const styles = StyleSheet.create({
         flex: 1
     },
     cards: {
-        marginTop:15
+        marginTop:7,
+        marginBottom:7
+    },
+    preloader: {
+        marginTop:10,
+        marginBottom:10
     }
 });
 
