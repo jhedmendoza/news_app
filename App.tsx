@@ -5,7 +5,6 @@ import { PaperProvider } from 'react-native-paper';
 
 import HeaderNavigationBar from './src/components/Header.js';
 import BottomNavigationBar from './src/components/Footer.js';
-import RecentNewsScreen from './src/screens/RecentNews.js';
 
 const Stack = createStackNavigator();
 

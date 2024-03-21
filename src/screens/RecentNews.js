@@ -1,13 +1,17 @@
 import  {React, useState, useEffect, useReducer }  from 'react';
 import {StyleSheet, View, ScrollView, Linking} from 'react-native';
-import {Card, Text, ActivityIndicator, Snackbar  } from 'react-native-paper';
+import {Card, Text, ActivityIndicator  } from 'react-native-paper';
 import axios from 'axios';
+import { MMKV } from 'react-native-mmkv'
+
+export const storage = new MMKV()
 
 const RecentNewsScreen = () =>{
 
     const defaultBannerImage = 'https://placehold.jp/30/eeeeee/cccccc/300x150.png?text=No+Image'
     const API_KEY = '10f83bbe18b14c5c86721e2a5a9c9579'
     const API_URL = 'https://newsapi.org/v2/top-headlines'
+    const countryCode =  storage.contains('user.countryCode') ? storage.getString('user.countryCode') : 'us'
 
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,7 +28,7 @@ const RecentNewsScreen = () =>{
         axios.get(API_URL, {
           params: {
            apiKey: API_KEY,
-            country: 'us',
+            country: countryCode,
             page: page,
             pageSize: 10
           }
