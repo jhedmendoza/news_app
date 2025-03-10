@@ -1,4 +1,4 @@
-This is a  [**React Native**] project — a simple app that integrates news API.
+This is a simple [**React Native**] project that integrates news API (https://newsapi.org).
 
 # Getting Started
 
